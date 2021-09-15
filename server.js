@@ -41,7 +41,7 @@ app.get("/call", (req, res) => {
 });
 
 app.get("/allrooms", (req, res) => {
-  res.render("available", { avail_rooms: Object.keys(db.JSON()), agent: req.query.agentid  });
+  res.render("available", { avail_rooms: Object.keys(room_db.JSON()), agent: req.query.agentid  });
 });
 
 
@@ -74,7 +74,7 @@ app.get("/purge", (req, res) => {
   }
   else{
     console.log(rid);
-    db.delete(rid);
+    room_db.delete(rid);
   }
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({ inited: rid }));
