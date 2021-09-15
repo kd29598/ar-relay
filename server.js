@@ -5,8 +5,16 @@ app.use(cors());
 app.options('*', cors());
 const server = require("http").Server(app);
 const { v4: uuidv4 } = require("uuid");
-const Database = require("@replit/database")
-const db = new Database()
+//const Database = require("@replit/database")
+const JSONdb = require('simple-json-db');
+// const db = new Database()
+const room_db = new JSONdb('room.json');
+
+const img_db = new JSONdb('img_save.json');
+
+room_db.JSON({});
+img_db.JSON({});
+
 app.set("view engine", "ejs");
 // app.use(express.json()) 
 app.use(express.json({limit: '50mb'}));
@@ -28,37 +36,32 @@ app.get("/", (req, res) => {
 });
 
 app.get("/call", (req, res) => {
-  db.set("room_"+req.query.id, "online").then(()=>{
+  room_db.set(req.query.id, "online");
   res.render("room", { roomId: req.query.id, userType: req.query.user,agent: req.query.agentid });
-  });
 });
 
 app.get("/allrooms", (req, res) => {
-  all_ks=[]
-  db.list("room_").then(keys => {
-  res.render("available", { avail_rooms: keys, agent: req.query.agentid  });});
+  res.render("available", { avail_rooms: Object.keys(db.JSON()), agent: req.query.agentid  });
 });
 
 
 app.post("/claims", (req, res) => {
   // console.log(req.body);
-  db.set(req.body.id, req.body)
-  .then(()=>{
+  img_db.set(req.body.id, req.body);
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify(res.body));
-  });  
+
 });
 
 app.get("/claim/:id", (req, res) => {
-  db.get(req.params.id).then(value => {
+  
     res.setHeader('Content-Type', 'application/json');
-    res.end(JSON.stringify(value));
-  });
+    res.end(JSON.stringify(img_db.get(req.params.id)));
 });
 
 app.get("/claim/:id/delete", (req, res) => {
   
-    db.delete(req.params.id).then(() => {console.log('sucess '+rid)});
+    img_db.delete(req.params.id);
     res.setHeader('Content-Type', 'application/json');
     res.end(JSON.stringify({success:true}));
 });
@@ -67,11 +70,11 @@ app.get("/claim/:id/delete", (req, res) => {
 app.get("/purge", (req, res) => {
   rid=req.query.id
   if (rid==null){
-  db.list("room_").then(keys => {keys.forEach(key => {db.delete(key);})});
+  room_db.JSON({});
   }
   else{
     console.log(rid);
-    db.delete("room_"+rid).then(() => {console.log('sucess '+rid)});
+    db.delete(rid);
   }
   res.setHeader('Content-Type', 'application/json');
   res.end(JSON.stringify({ inited: rid }));
@@ -92,4 +95,4 @@ io.on("connection", (socket) => {
   });
 });
 
-server.listen(process.env.PORT || 3333);
+server.listen(process.env.PORT || 8080);
