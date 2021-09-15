@@ -42,8 +42,8 @@
   <ul >
     <% for (var i = 0; i < avail_rooms.length; i++) { %>
     <li class="room_list">
-      <a href="/call/?user=agent&id=<%=avail_rooms[i].split('_')[1] %>&agentid=<%=agent%>"/>
-        <%= avail_rooms[i].split('_')[1] %>
+      <a href="/call/?user=agent&id=<%=avail_rooms[i] %>&agentid=<%=agent%>"/>
+        <%= avail_rooms[i] %>
     </li>
     <% } %>
 </ul>
